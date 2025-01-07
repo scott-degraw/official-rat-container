@@ -1,6 +1,6 @@
 FROM ubuntu:20.04
 
-LABEL maintainer="Mark Anderson <anderson.mark@queensu.ca>"
+LABEL maintainer="Will Parker <william.parker@physics.ox.ac.uk>"
 
 # Switch default shell to bash
 SHELL ["/bin/bash", "-c"]
@@ -18,18 +18,18 @@ RUN mkdir -p /home/software
 
 RUN apt-get update && apt-get install -y gcc g++ gfortran \
     libssl-dev libpcre3-dev xlibmesa-glu-dev libglew1.5-dev \
-    libftgl-dev libmysqlclient-dev libfftw3-dev libcfitsio-dev \
+    libftgl-dev libmysqlclient-dev libfftw3-dev libcfitsio-dev cppcheck \
     graphviz-dev libavahi-compat-libdnssd-dev libldap2-dev libxml2-dev libkrb5-dev \
     libgsl0-dev emacs wget git tar curl nano vim rsync strace valgrind make cmake \
     libxpm-dev libxft-dev libxext-dev libcurl4-openssl-dev libbz2-dev latex2html \
-    python3 python3-dev python3-pip python3-venv python2 python2-dev python-is-python3
+    python3 python3-dev python3-pip python3-venv python-is-python3
 
 # Install Python packages
 RUN python3 -m pip install --upgrade --no-cache-dir pip && \
     python3 -m pip install --upgrade --no-cache-dir setuptools && \
     python3 -m pip install --no-cache-dir pipx && \
     python3 -m pip install --no-cache-dir requests pytz python-dateutil \
-    ipython numpy scipy matplotlib
+    ipython numpy scipy matplotlib pylint
 
 # Install SCons via pip (quicker and simpler than from source)
 ARG SCONS_VERSION=3.1.2
@@ -66,11 +66,16 @@ RUN wget https://cern.ch/geant4-data/releases/geant$GEANT4_VERSION.tar.gz && \
     rm -rf geant$GEANT4_VERSION.tar.gz
 
 # Install ROOT 6 binary
-ARG ROOT_VERSION=6.22.08
+ARG ROOT_VERSION=6.32.02
 WORKDIR $SOFTWAREDIR
-RUN wget https://root.cern/download/root_v$ROOT_VERSION.Linux-ubuntu20-x86_64-gcc9.3.tar.gz && \
-    tar xzfv root_v$ROOT_VERSION.Linux-ubuntu20-x86_64-gcc9.3.tar.gz && \
-    rm -rf root_v$ROOT_VERSION.Linux-ubuntu20-x86_64-gcc9.3.tar.gz
+
+RUN wget https://root.cern/download/root_v$ROOT_VERSION.source.tar && \
+    tar xvf root_v6.32.02.source.tar && \
+    mv root-6.32.02 root && \
+    mkdir root-build && cd root-build && \
+    cmake -Droofit=ON -Dfortran=OFF -Dfftw3=ON -Dgsl=ON -Dgdml=ON -Dmathmore=ON -Dclad=OFF -Dbuiltin_tbb=OFF -Dimt=OFF  ../root && \
+    make -j 4 && \
+    rm ../root_v$ROOT_VERSION.source.tar
 
 # Cleanup the cache to make the image smaller
 RUN apt-get autoremove -y && apt-get clean -y

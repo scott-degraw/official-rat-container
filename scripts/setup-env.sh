@@ -1,13 +1,11 @@
 #!/bin/bash
 
-SL_PYTHON27=/opt/rh/python27/enable
-if [ -f "$SL_PYTHON27" ]; then
-   source $SL_PYTHON27
-fi
-
-source /home/software/root/bin/thisroot.sh
+pushd /home/software/root-build/bin/
+source thisroot.sh
+popd
 source /home/software/geant4.10.00.p04/bin/geant4.sh
 
+source /home/scripts/setup-genie.sh
 # export TF_DIR=/usr/local
 # export CPPFLOW_DIR=/home/software/cppflow
 # export LIBRARY_PATH=$LIBRARY_PATH:$TF_DIR/lib
