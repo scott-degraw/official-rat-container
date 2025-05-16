@@ -83,13 +83,13 @@ ENV PYTHIA6=${SOFTWAREDIR}/pythia6/v6_428
 ARG ROOT_VERSION=6.28.06
 WORKDIR $SOFTWAREDIR
 
-RUN wget https://root.cern/download/root_v$ROOT_VERSION.source.tar && \
-    tar xvf root_v${ROOT_VERSION}.source.tar && \
-    mv root-${ROOT_VERSION} root && \
+RUN wget https://root.cern.ch/download/root_v$ROOT_VERSION.source.tar.gz && \
+    tar zxvf root_v${ROOT_VERSION}.source.tar.gz 
+RUN mv root-${ROOT_VERSION} root && \
     mkdir root-build && cd root-build && \
     cmake -Droofit=ON -Dfortran=OFF -Dfftw3=ON -Dgsl=ON -Dgdml=ON -Dmathmore=ON -Dclad=OFF -Dbuiltin_tbb=OFF -Dimt=OFF -Dpythia6=ON -DPYTHIA6_DIR=${SOFTWAREDIR}/pythia6/v6_428 ../root && \
     make -j $(nproc) && \
-    rm ../root_v$ROOT_VERSION.source.tar
+    rm ../root_v$ROOT_VERSION.source.tar.gz
 
 RUN apt-get -y update && apt-get -y upgrade && apt-get -y install liblog4cpp5-dev
 RUN wget https://lhapdf.hepforge.org/downloads/?f=LHAPDF-6.5.4.tar.gz -O LHAPDF-6.5.4.tar.gz && \
@@ -111,7 +111,7 @@ RUN pushd ${SOFTWAREDIR}/root-build/bin && source thisroot.sh && popd && \
   --enable-lhapdf6 \
   --with-lhapdf6-lib=${SOFTWAREDIR}/LHAPDF6/lib \
   --with-lhapdf6-inc=${SOFTWAREDIR}/LHAPDF6/include \
-  --with-pythia6-lib=${SOFTWAREDIR}/pythia6/v6_428/lib &&\
+  --with-pythia6-lib=${SOFTWAREDIR}/pythia6/v6_428/lib && \
   make -j$(nproc) && make install && \
   # # GENIE requires these files to be present at runtime, but doesn't install them
   cp -r config ${SOFTWAREDIR}/genie/ && \
